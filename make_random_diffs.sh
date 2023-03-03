@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# location: /global/homes/s/sglanvil/S2S
-
-imonth=01
+imonth=$1
 
 # load NCO module on NERSC
 module load cray-netcdf
@@ -41,8 +39,7 @@ for (( i=1; i<=999; i++ )); do
         echo "$iPadded,$num1,$num2,$datestr1,$datestr2"
         echo
 
-#       outFile=${outDir}/v2.LR.historical_daily-cami_0241.eam.i.M{$imonth}.diff.{$iPadded}.nc
-#       ncdiff ${files[$num1-1]} ${files[$num2-1]} $outFile
+        outFile=${outDir}/v2.LR.historical_daily-cami_0241.eam.i.M${imonth}.diff.${iPadded}.nc
+        ncdiff ${files[$num1-1]} ${files[$num2-1]} $outFile
 
-done > random_numbers.txt
-
+done > pert_diffs_month${imonth}.txt
