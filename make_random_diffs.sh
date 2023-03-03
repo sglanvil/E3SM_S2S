@@ -1,4 +1,5 @@
 #!/bin/bash
+# location on NERSC: /global/homes/s/sglanvil/S2S
 
 imonth=$1
 
@@ -43,3 +44,4 @@ for (( i=1; i<=999; i++ )); do
         ncdiff ${files[$num1-1]} ${files[$num2-1]} $outFile
 
 done > pert_diffs_month${imonth}.txt
+
