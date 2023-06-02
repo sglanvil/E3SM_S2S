@@ -61,3 +61,4 @@ contourf(lon,lat,R','linestyle','none');
 colormap(gradsmap); colorbar; clim([-0.8 0.8])
 title('H2OSOI Correlation (TRENDY vs ERA5)')
 print('/glade/work/sglanvil/CCR/E3SM_SMYLE/H2OSOI_TRENDY','-r300','-dpng');
+
