@@ -36,17 +36,23 @@ for ivar=1:7
         VARfull(:,:,itime)=griddata(lon,lat,...
             squeeze(var1(:,itime)),lonNew,latNew);   
     end
-    VARfull(abs(VARfull)>5*std(VARfull,'omitnan'))=NaN;
+    VARmean=mean(mean(mean(VARfull,'omitnan'),'omitnan'),'omitnan');
+    VARstd=std(std(std(VARfull,'omitnan'),'omitnan'),'omitnan');
+
+    VARfull(abs(VARfull)>(VARmean+5*VARstd))=NaN;
     lon=lon_ERA5; lat=lat_ERA5;
     VARzm=squeeze(mean(VARfull,1,'omitnan'));
-    VARgm=squeeze(mean(VARzm(abs(lat)<=50,:),1,'omitnan'))/1000;
+    VARgm=squeeze(mean(VARzm(abs(lat)<=90,:),1,'omitnan'));
+    VARgmcos=squeeze(sum(VARzm.*cosd(lat),'omitnan')./sum(cosd(lat),'omitnan')); 
     
     subplot(3,3,ivar)
     hold on; grid on; box on;
-    plot(time_ELM(1:12:end),VARgm(1:12:end),'k','linewidth',2);
+    plot(time_ELM(1:12:end)/12,VARgmcos(1:12:end),'k','linewidth',2);
+    set(gca,'xtick',0:100:500);
     title(varName);
     ylabel(unitsName)
-    xlabel('Spinup Month')
+    xlabel('Spinup Year')
+    sgtitle('s2sLandSpinupSE\_perl\_noCROP');
     set(gca,'fontsize',10)
 end
 
