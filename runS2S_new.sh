@@ -1,8 +1,10 @@
 #!/bin/bash
 # sglanvil | July 23, 2024
-source /global/common/software/e3sm/anaconda_envs/load_latest_e3sm_unified_pm-cpu.sh
 
+# ----------------------- USER SPECIFIES --------------------------
 DATE=2012-05-01
+ensembleSize=11
+# -----------------------------------------------------------------
 
 YEAR=$(echo $DATE | cut -d'-' -f1)
 MONTH=$(echo $DATE | cut -d'-' -f2)
@@ -16,18 +18,20 @@ RESOLUTION=ne30pg2_EC30to60E2r2
 MACHINE=pm-cpu
 PROJECT=mp9
 SOURCE_CODE=/global/cfs/cdirs/mp9/e3sm_tags/E3SMv2.1/cime/scripts/
+
 mkdir -p ${SCRATCH}/v21.LR.S2Ssmbb/
 CASE_BUILD_DIR=${SCRATCH}/v21.LR.S2Ssmbb/exeroot/bld/
 NAMELISTS_DIR=/global/homes/s/sglanvil/S2S/E3SM_S2S_Forecasts/E3SM-Realtime-Forecast/bin/namelists/
 SOURCEMODS_DIR=/global/homes/s/sglanvil/S2S/E3SM_S2S_Forecasts/E3SM-Realtime-Forecast/bin/sourceMods/
-
-
+RUN_REFDIR=/global/homes/s/sglanvil/S2S/E3SM_S2S_Forecasts/E3SM-Realtime-Forecast/bin/StageIC/
+RUN_REFCASE=v21.LR.SMYLE_IC.${YEAR}-${MONTH}.01
+MAIN_CASE_NAME=v21.LR.S2Ssmbb.${YEAR}-${MONTH}-${DAY}.001
+MAIN_CASE_ROOT=${SCRATCH}/v21.LR.S2Ssmbb/${MAIN_CASE_NAME}/
 
 # ------------------- CREATE LIST OF PERTURBATION FILE VALUES ----------------------
-ensembleSize=11
 numbers=()
 seen=()
-for ((i = 0; i < $(( ensembleSize/2 )); i++)); do
+for ((i=0; i<$(( ensembleSize/2 )); i++)); do
         rand_num=$(( RANDOM % 999 + 1 ))
         formatted_num=$(printf "%03d" "$rand_num")
         while [[ " ${seen[@]} " =~ " $formatted_num " ]]; do
@@ -38,17 +42,16 @@ for ((i = 0; i < $(( ensembleSize/2 )); i++)); do
         numbers+=("$formatted_num")
         seen+=("$formatted_num")
 done
-echo "${numbers[@]}" > eamic_2012-05-01.1-10.txt
+echo "${numbers[@]}" > eamic_${YEAR}-${MONTH}-${DAY}.1-10.txt
 # ----------------------------------------------------------------------------------
 
+for ((i=1; i<=ensembleSize; i++)); do
+        mbr=$(printf "%03d" $i)
+        echo '---------------------------------------------------------------------'
+        echo $mbr
+        echo
 
-
-for mbr in {001..011}; do
-        RUN_REFDIR=/global/homes/s/sglanvil/S2S/E3SM_S2S_Forecasts/E3SM-Realtime-Forecast/bin/StageIC/
-        RUN_REFCASE=v21.LR.SMYLE_IC.${YEAR}-${MONTH}.01
-        MAIN_CASE_NAME=v21.LR.S2Ssmbb.${YEAR}-${MONTH}-${DAY}.001
         CASE_NAME=v21.LR.S2Ssmbb.${YEAR}-${MONTH}-${DAY}.${mbr}
-        MAIN_CASE_ROOT=${SCRATCH}/v21.LR.S2Ssmbb/${MAIN_CASE_NAME}/
         CASE_ARCHIVE_DIR=${MAIN_CASE_ROOT}/archive.${mbr}/
         CASE_SCRIPTS_DIR=${MAIN_CASE_ROOT}/case_scripts.${mbr}/
         CASE_RUN_DIR=${MAIN_CASE_ROOT}/run.${mbr}/
@@ -93,8 +96,10 @@ for mbr in {001..011}; do
                 echo "mbr: $mbr, inx: $inx, weight: $weight"
                 echo ${pert_file}
                 final_file=${CASE_RUN_DIR}/v21.LR.SMYLE_IC.2012-05.01.eam.i.2012-05-01-00000.nc
+                source /global/common/software/e3sm/anaconda_envs/load_latest_e3sm_unified_pm-cpu.sh
                 ncflint -O -C -v time_bnds,lev,ilev,hyai,hybi,hyam,hybm,U,V,T,Q,PS -w ${weight},1.0 ${pert_file} ${original_file} ${final_file}
                 ncrename -d ncol_d,ncol ${final_file}
+                conda deactivate
         fi
         # 1. grab elm.r and mosart.r
         # 2. grab mpaso.rst mpassi.rst (do year conversion and ncrename xtime)
@@ -141,4 +146,6 @@ done
 # DONE: organize fincl variables (user_nl) to match CESM
 # DONE: make if statement for BUILD_COMPLETE bit
 # DONE: make the generate eami, rename bits
+
+
 
