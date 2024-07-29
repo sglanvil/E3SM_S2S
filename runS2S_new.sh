@@ -20,6 +20,7 @@ PROJECT=mp9
 SOURCE_CODE=/global/cfs/cdirs/mp9/e3sm_tags/E3SMv2.1/cime/scripts/
 
 mkdir -p ${SCRATCH}/v21.LR.S2Ssmbb/
+this_full_path=$(realpath "$0")
 CASE_BUILD_DIR=${SCRATCH}/v21.LR.S2Ssmbb/exeroot/bld/
 NAMELISTS_DIR=/global/homes/s/sglanvil/S2S/E3SM_S2S_Forecasts/E3SM-Realtime-Forecast/bin/namelists/
 SOURCEMODS_DIR=/global/homes/s/sglanvil/S2S/E3SM_S2S_Forecasts/E3SM-Realtime-Forecast/bin/sourceMods/
@@ -138,6 +139,13 @@ for ((i=1; i<=ensembleSize; i++)); do
         ./xmlchange DOUT_S=TRUE
         ./xmlchange JOB_WALLCLOCK_TIME=01:00:00 --subgroup case.run
 
+        # ---------------------------- COPY PROVENANCE SCRIPT ---------------------------- 
+        script_provenance_dir=${CASE_SCRIPTS_DIR}/run_script_provenance
+        mkdir -p ${script_provenance_dir}
+        this_script_name=$(basename "$this_full_path")
+        script_provenance_name=${this_script_name}.`date +%Y%m%d-%H%M%S`
+        cp -p ${this_full_path} ${script_provenance_dir}/${script_provenance_name}
+
         # ---------------------------- SUBMIT RUN ----------------------------
         ./case.submit
 done
@@ -146,6 +154,5 @@ done
 # DONE: organize fincl variables (user_nl) to match CESM
 # DONE: make if statement for BUILD_COMPLETE bit
 # DONE: make the generate eami, rename bits
-
-
+# DONE: add provenance thing
 
