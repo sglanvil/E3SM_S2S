@@ -12,11 +12,9 @@ while [ "$d" != 2021-01-04 ]; do # specify monday end date (the EXCLUDED monday)
         day=$(date -d "$d" +%d)
         echo ${d}
         if ls ${srcDir}/${d}-00000/*elm.r.* 1> /dev/null 2>&1; then
-                # File exists, do nothing
                 cp ${srcDir}/${d}-00000/*.elm.r.* ${destDir}/
                 cp ${srcDir}/${d}-00000/*.mosart.r.* ${destDir}/
         else
-                # File does not exist, print message
                 echo "File does not exist: ${d}"
         fi
         d=$(date -I -d "$d + 7 day")
